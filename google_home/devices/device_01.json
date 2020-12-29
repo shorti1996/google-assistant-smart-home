@@ -1,0 +1,33 @@
+{
+    "type": "action.devices.types.LIGHT",
+    "traits": [
+        "action.devices.traits.OnOff",
+        "action.devices.traits.Brightness",
+        "action.devices.traits.ColorSetting"
+    ],
+    "name": {
+        "name": "other thing",
+        "defaultNames": [
+          "other thing"
+        ],
+        "nicknames": [
+          "other thing"
+        ]
+    },
+    "attributes": {
+        "colorModel": "rgb",
+        "colorTemperatureRange": {
+            "temperatureMinK": 2000,
+            "temperatureMaxK": 9000
+        },
+        "commandOnlyColorSetting": false
+    },
+    "willReportState": false,
+    "roomHint": "My room",
+    "deviceInfo": {
+        "manufacturer": "shorti1996",
+        "model": "1",
+        "hwVersion": "1",
+        "swVersion": "1"
+    }
+}
