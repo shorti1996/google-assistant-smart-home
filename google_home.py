@@ -1,31 +1,32 @@
 # coding: utf8
 
-import config
-from flask import Flask
-from flask import request
-from flask import render_template
-from flask import send_from_directory
-from flask import redirect
-from flask import jsonify
-import sys
-import os
-import requests
-import urllib
+import importlib
 import json
+import logging
+import os
 import random
 import string
+import sys
+import urllib
 from time import time
-import importlib
-import logging
+
+from flask import Flask
+from flask import jsonify
+from flask import redirect
+from flask import render_template
+from flask import request
+from flask import send_from_directory
+
+import config
 
 # Enable log if need
 
 if hasattr(config, 'LOG_FILE'):
     logging.basicConfig(level=config.LOG_LEVEL,
-                    format=config.LOG_FORMAT,
-                    datefmt=config.LOG_DATE_FORMAT,
-                    filename=config.LOG_FILE,
-                    filemode='a')
+                        format=config.LOG_FORMAT,
+                        datefmt=config.LOG_DATE_FORMAT,
+                        filename=config.LOG_FILE,
+                        filemode='a')
 logger = logging.getLogger()
 
 # Path to device plugins
@@ -39,6 +40,7 @@ app = Flask(__name__)
 
 logger.info("Started.", extra={'remote_addr': '-', 'user': '-'})
 
+
 # Function to load user info
 def get_user(username):
     filename = os.path.join(config.USERS_DIRECTORY, username + ".json")
@@ -51,6 +53,7 @@ def get_user(username):
         logger.warning("user not found", extra={'remote_addr': request.remote_addr, 'user': username})
         return None
 
+
 # Function to retrieve token from header
 def get_token():
     auth = request.headers.get('Authorization')
@@ -61,6 +64,7 @@ def get_token():
         logger.warning("invalid token: %s", auth, extra={'remote_addr': request.remote_addr, 'user': '-'})
         return None
 
+
 # Function to check current token, returns username
 def check_token():
     access_token = get_token()
@@ -70,6 +74,7 @@ def check_token():
             return f.read()
     else:
         return None
+
 
 # Function to load device info
 def get_device(device_id):
@@ -83,14 +88,17 @@ def get_device(device_id):
     else:
         return None
 
+
 # Random string generator
 def random_string(stringLength=8):
     chars = string.ascii_letters + string.digits
     return ''.join(random.choice(chars) for i in range(stringLength))
 
+
 @app.route('/css/<path:path>')
 def send_css(path):
     return send_from_directory('css', path)
+
 
 # OAuth entry point
 @app.route('/auth/', methods=['GET', 'POST'])
@@ -101,14 +109,14 @@ def auth():
         return render_template('login.html')
     elif request.method == 'POST':
         if ("username" not in request.form
-            or "password" not in request.form
-            or "state" not in request.args
-            or "response_type" not in request.args
-            or request.args["response_type"] != "code"
-            or "client_id" not in request.args
-            or request.args["client_id"] != config.CLIENT_ID):
-                logger.warning("invalid auth request", extra={'remote_addr': request.remote_addr, 'user': request.form['username']})
-                return "Invalid request", 400
+                or "password" not in request.form
+                or "state" not in request.args
+                or "response_type" not in request.args
+                or request.args["response_type"] != "code"
+                or "client_id" not in request.args
+                or request.args["client_id"] != config.CLIENT_ID):
+            logger.warning("invalid auth request", extra={'remote_addr': request.remote_addr, 'user': request.form['username']})
+            return "Invalid request", 400
         # Check login and password
         user = get_user(request.form["username"])
         if user == None or user["password"] != request.form["password"]:
@@ -120,23 +128,24 @@ def auth():
         last_code_user = request.form["username"]
         last_code_time = time()
 
-        params = {'state': request.args['state'], 
+        params = {'state': request.args['state'],
                   'code': last_code,
                   'client_id': config.CLIENT_ID}
         logger.info("generated code", extra={'remote_addr': request.remote_addr, 'user': request.form['username']})
         return redirect(request.args["redirect_uri"] + '?' + urllib.parse.urlencode(params))
+
 
 # OAuth, token request
 @app.route('/token/', methods=['POST'])
 def token():
     global last_code, last_code_user, last_code_time
     if ("client_secret" not in request.form
-        or request.form["client_secret"] != config.CLIENT_SECRET
-        or "client_id" not in request.form
-        or request.form["client_id"] != config.CLIENT_ID
-        or "code" not in request.form):
-            logger.warning("invalid token request", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
-            return "Invalid request", 400
+            or request.form["client_secret"] != config.CLIENT_SECRET
+            or "client_id" not in request.form
+            or request.form["client_id"] != config.CLIENT_ID
+            or "code" not in request.form):
+        logger.warning("invalid token request", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
+        return "Invalid request", 400
     # Check code
     if request.form["code"] != last_code:
         logger.warning("invalid code", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
@@ -153,6 +162,7 @@ def token():
     logger.info("access granted", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
     # Return just token without any expiration time
     return jsonify({'access_token': access_token})
+
 
 # Main URL to interact with Google requests
 @app.route('/', methods=['GET', 'POST'])
@@ -216,7 +226,7 @@ def fulfillment():
                         action_result = action_method(custom_data, command, params)
                         action_result['ids'] = [device_id]
                         result['payload']['commands'].append(action_result)
-        
+
         # Disconnect intent, need to revoke token
         if intent == "action.devices.DISCONNECT":
             access_token = get_token()
@@ -224,7 +234,11 @@ def fulfillment():
             if os.path.isfile(access_token_file) and os.access(access_token_file, os.R_OK):
                 os.remove(access_token_file)
                 logger.debug("token %s revoked", access_token, extra={'remote_addr': request.remote_addr, 'user': user_id})
-            return {}    
+            return {}
 
     logger.debug("response: \r\n%s", json.dumps(result, indent=4), extra={'remote_addr': request.remote_addr, 'user': user_id})
     return jsonify(result)
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=88)
