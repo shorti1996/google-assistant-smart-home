@@ -151,7 +151,7 @@ def token():
         logger.warning("invalid code", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
         return "Invalid code", 403
     # Check time
-    if  time() - last_code_time > 10:
+    if time() - last_code_time > 10:
         logger.warning("code is too old", extra={'remote_addr': request.remote_addr, 'user': last_code_user})
         return "Code is too old", 403
     # Generate and save random token with username
@@ -168,17 +168,17 @@ def token():
 @app.route('/', methods=['GET', 'POST'])
 def fulfillment():
     # Google will send POST requests only, some it's just placeholder for GET
-    if request.method == 'GET': return "Your smart home is ready."
+    if request.method == 'GET':
+        return "Your smart home is ready."
 
     # Check token and get username
     user_id = check_token()
-    if user_id == None:
+    if user_id is None:
         return "Access denied", 403
     r = request.get_json()
     logger.debug("request: \r\n%s", json.dumps(r, indent=4), extra={'remote_addr': request.remote_addr, 'user': user_id})
 
-    result = {}
-    result['requestId'] = r['requestId']
+    result = {'requestId': r['requestId']}
 
     # Let's check inputs array. Why it's array? Is it possible that it will contain multiple objects? I don't know.
     inputs = r['inputs']
@@ -205,7 +205,7 @@ def fulfillment():
                 # Load module for this device
                 device_module = importlib.import_module(device_id)
                 # Call query method for this device
-                query_method = getattr(device_module, device_id + "_query")
+                query_method = getattr(device_module, "on_query")
                 result['payload']['devices'][device_id] = query_method(custom_data)
 
         # Execute intent, need to execute some action
@@ -219,7 +219,7 @@ def fulfillment():
                     # Load module for this device
                     device_module = importlib.import_module(device_id)
                     # Call execute method for this device for every execute command
-                    action_method = getattr(device_module, device_id + "_action")
+                    action_method = getattr(device_module, "on_action")
                     for e in command['execution']:
                         command = e['command']
                         params = e.get("params", None)

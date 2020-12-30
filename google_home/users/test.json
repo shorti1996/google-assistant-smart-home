@@ -1,7 +1,6 @@
 {
     "password": "test",
     "devices": [
-        "pc",
-        "device_01"
+        "leds"
     ]
 }

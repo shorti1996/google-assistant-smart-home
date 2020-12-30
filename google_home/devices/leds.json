@@ -1,0 +1,30 @@
+{
+  "type": "action.devices.types.LIGHT",
+  "traits": [
+    "action.devices.traits.OnOff",
+    "action.devices.traits.Brightness",
+    "action.devices.traits.ColorSetting"
+  ],
+  "name": {
+    "name": "Led strip",
+    "defaultNames": [
+      "Led strip"
+    ],
+    "nicknames": [
+      "ledy na strychu",
+      "leds on attic"
+    ]
+  },
+  "attributes": {
+    "commandOnlyBrightness": false,
+    "colorModel": "rgb",
+    "willReportState": false,
+    "roomHint": "My room",
+    "deviceInfo": {
+      "manufacturer": "shorti1996",
+      "model": "1",
+      "hwVersion": "1",
+      "swVersion": "1"
+    }
+  }
+}
