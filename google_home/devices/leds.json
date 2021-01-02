@@ -3,7 +3,8 @@
   "traits": [
     "action.devices.traits.OnOff",
     "action.devices.traits.Brightness",
-    "action.devices.traits.ColorSetting"
+    "action.devices.traits.ColorSetting",
+    "action.devices.traits.Toggles"
   ],
   "name": {
     "name": "Led strip",
@@ -16,6 +17,20 @@
     ]
   },
   "attributes": {
+    "availableToggles": [
+      {
+        "name": "nightmode_toggle",
+        "name_values": [
+          {
+            "name_synonym": [
+              "night mode",
+              "led night mode"
+            ],
+            "lang": "en"
+          }
+        ]
+      }
+    ],
     "commandOnlyBrightness": false,
     "colorModel": "rgb",
     "willReportState": false,

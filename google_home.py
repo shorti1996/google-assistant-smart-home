@@ -2,7 +2,6 @@
 
 import importlib
 import json
-import logging
 import os
 import random
 import string
@@ -18,16 +17,18 @@ from flask import request
 from flask import send_from_directory
 
 import config
+import custom_logger
 
 # Enable log if need
 
-if hasattr(config, 'LOG_FILE'):
-    logging.basicConfig(level=config.LOG_LEVEL,
-                        format=config.LOG_FORMAT,
-                        datefmt=config.LOG_DATE_FORMAT,
-                        filename=config.LOG_FILE,
-                        filemode='a')
-logger = logging.getLogger()
+# if hasattr(config, 'LOG_FILE'):
+#     logging.basicConfig(level=config.LOG_LEVEL,
+#                         format=config.LOG_FORMAT,
+#                         datefmt=config.LOG_DATE_FORMAT,
+#                         filename=config.LOG_FILE,
+#                         filemode='a')
+
+logger = custom_logger.logger
 
 # Path to device plugins
 sys.path.insert(0, config.DEVICES_DIRECTORY)
